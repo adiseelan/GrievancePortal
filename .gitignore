@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+publish/
+
+# User-specific / IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local database files (SQLite)
+*.db
+*.db-shm
+*.db-wal
+
+# Uploaded files (keep the folder, ignore contents)
+App_Data/uploads/*
+!App_Data/uploads/.gitkeep
+
+# macOS
+.DS_Store
+
+# Secrets (never commit)
+secrets.json
+*.env

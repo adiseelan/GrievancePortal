@@ -1,0 +1,135 @@
+@model GrievanceDetailsViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Grievance " + Model.Grievance.TicketNumber;
+    var g = Model.Grievance;
+    var officers = ViewBag.Officers as SelectList;
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Grievance <span class="font-monospace">@g.TicketNumber</span></h1>
+        <div class="text-muted">@g.Subject</div>
+    </div>
+    <partial name="_StatusBadge" model="@g.Status.ToString()" />
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header">Details</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Raised by</dt>
+                    <dd class="col-sm-8">@g.Applicant?.FullName <span class="text-muted small">(@g.Applicant?.Email)</span></dd>
+
+                    <dt class="col-sm-4 text-muted">Category</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(g.Category) ? "—" : g.Category)</dd>
+
+                    <dt class="col-sm-4 text-muted">Raised on</dt>
+                    <dd class="col-sm-8">@g.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</dd>
+
+                    <dt class="col-sm-4 text-muted">Assigned officer</dt>
+                    <dd class="col-sm-8">@(g.AssignedOfficer?.FullName ?? "Unassigned")</dd>
+
+                    <dt class="col-sm-4 text-muted">Description</dt>
+                    <dd class="col-sm-8" style="white-space: pre-line;">@g.Description</dd>
+
+                    @if (!string.IsNullOrWhiteSpace(g.Resolution))
+                    {
+                        <dt class="col-sm-4 text-muted">Resolution</dt>
+                        <dd class="col-sm-8" style="white-space: pre-line;">@g.Resolution</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @if (Model.IsStaffView)
+        {
+            <div class="card mb-4">
+                <div class="card-header">Officer action</div>
+                <div class="card-body">
+                    <form asp-action="Update" method="post">
+                        <input type="hidden" name="Id" value="@g.Id" />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="NewStatus">Status</label>
+                                <select name="NewStatus" id="NewStatus" class="form-select">
+                                    @foreach (var st in Enum.GetValues<GrievanceStatus>())
+                                    {
+                                        if (st == g.Status)
+                                        {
+                                            <option value="@st" selected>@st</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@st">@st</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="AssignedOfficerId">Assign to officer</label>
+                                <select name="AssignedOfficerId" id="AssignedOfficerId" class="form-select"
+                                        asp-items="officers">
+                                    <option value="">— Unassigned —</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="Resolution">Resolution / response <span class="text-muted">(required to resolve or close)</span></label>
+                            <textarea name="Resolution" id="Resolution" class="form-control" rows="3">@g.Resolution</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update grievance</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-clock-history me-1"></i>Audit trail</div>
+            <div class="card-body">
+                @if (Model.Trail.Count == 0)
+                {
+                    <p class="text-muted mb-0">No activity recorded yet.</p>
+                }
+                else
+                {
+                    <ul class="timeline mb-0">
+                        @foreach (var log in Model.Trail)
+                        {
+                            <li>
+                                <div class="fw-semibold">@log.Action</div>
+                                @if (log.OldStatus is not null || log.NewStatus is not null)
+                                {
+                                    <div class="small">
+                                        @if (log.OldStatus is not null)
+                                        {
+                                            <span class="text-muted">@log.OldStatus</span> <i class="bi bi-arrow-right"></i>
+                                        }
+                                        <span>@log.NewStatus</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(log.Remarks))
+                                {
+                                    <div class="small fst-italic text-muted">&ldquo;@log.Remarks&rdquo;</div>
+                                }
+                                <div class="text-muted small mt-1">
+                                    @log.PerformedByName &middot; @log.Timestamp.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <a asp-action="@(Model.IsStaffView ? "Dashboard" : "Index")"
+           asp-controller="@(Model.IsStaffView ? "Officer" : "Grievances")"
+           class="btn btn-outline-secondary w-100 mt-3">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+</div>

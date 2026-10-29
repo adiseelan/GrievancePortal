@@ -1,0 +1,86 @@
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "Reports";
+
+    string AppColor(ApplicationStatus s) => s switch
+    {
+        ApplicationStatus.Draft => "bg-secondary",
+        ApplicationStatus.Submitted => "bg-primary",
+        ApplicationStatus.UnderReview => "bg-info",
+        ApplicationStatus.Approved => "bg-success",
+        ApplicationStatus.Rejected => "bg-danger",
+        _ => "bg-secondary"
+    };
+    string GrvColor(GrievanceStatus s) => s switch
+    {
+        GrievanceStatus.Open => "bg-primary",
+        GrievanceStatus.Assigned => "bg-info",
+        GrievanceStatus.InProgress => "bg-warning",
+        GrievanceStatus.Resolved => "bg-success",
+        GrievanceStatus.Closed => "bg-secondary",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="h3 mb-0">Reports</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportApplicationsCsv" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-filetype-csv me-1"></i> Applications CSV
+        </a>
+        <a asp-action="ExportGrievancesCsv" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-filetype-csv me-1"></i> Grievances CSV
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="stat-tile p-3"><div class="stat-value">@Model.TotalUsers</div><div class="stat-label">Users</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-tile p-3"><div class="stat-value">@Model.ActiveSchemes / @Model.TotalSchemes</div><div class="stat-label">Active schemes</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-tile p-3"><div class="stat-value">@Model.TotalApplications</div><div class="stat-label">Applications</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-tile p-3"><div class="stat-value">@Model.TotalGrievances</div><div class="stat-label">Grievances</div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Applications by status</div>
+            <div class="card-body">
+                @{
+                    var appMax = Model.ApplicationCounts.Values.DefaultIfEmpty(0).Max();
+                }
+                @foreach (var kv in Model.ApplicationCounts)
+                {
+                    var pct = appMax == 0 ? 0 : (int)Math.Round(100.0 * kv.Value / appMax);
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>@kv.Key</span><span class="fw-semibold">@kv.Value</span>
+                    </div>
+                    <div class="progress mb-3" role="progressbar" aria-valuenow="@kv.Value" aria-valuemin="0" aria-valuemax="@appMax" style="height: 8px;">
+                        <div class="progress-bar @AppColor(kv.Key)" style="width: @pct%"></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Grievances by status</div>
+            <div class="card-body">
+                @{
+                    var grvMax = Model.GrievanceCounts.Values.DefaultIfEmpty(0).Max();
+                }
+                @foreach (var kv in Model.GrievanceCounts)
+                {
+                    var pct = grvMax == 0 ? 0 : (int)Math.Round(100.0 * kv.Value / grvMax);
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span>@kv.Key</span><span class="fw-semibold">@kv.Value</span>
+                    </div>
+                    <div class="progress mb-3" role="progressbar" aria-valuenow="@kv.Value" aria-valuemin="0" aria-valuemax="@grvMax" style="height: 8px;">
+                        <div class="progress-bar @GrvColor(kv.Key)" style="width: @pct%"></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

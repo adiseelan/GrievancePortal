@@ -1,0 +1,57 @@
+@model ApplyViewModel
+@{
+    ViewData["Title"] = "Apply";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a asp-controller="Schemes" asp-action="Index">Schemes</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Schemes" asp-action="Details" asp-route-id="@Model.SchemeId">@Model.SchemeName</a></li>
+                <li class="breadcrumb-item active">Apply</li>
+            </ol>
+        </nav>
+
+        <h1 class="h3 mb-1">Apply: @Model.SchemeName</h1>
+        <div class="scheme-dept mb-3">@Model.Department</div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Eligibility))
+        {
+            <div class="alert alert-light border">
+                <strong class="d-block mb-1">Eligibility</strong>
+                <span style="white-space: pre-line;">@Model.Eligibility</span>
+            </div>
+        }
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form asp-action="Apply" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="SchemeId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="SupportingDocument" class="form-label"></label>
+                        <input asp-for="SupportingDocument" type="file" accept="application/pdf"
+                               class="form-control" data-filename-target="#fileName" />
+                        <div class="form-text">PDF only, up to 5 MB. Required to submit; optional to save a draft.</div>
+                        <div id="fileName" class="small text-success mt-1"></div>
+                        <span asp-validation-for="SupportingDocument" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" name="submitAction" value="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i> Submit application
+                        </button>
+                        <button type="submit" name="submitAction" value="draft" class="btn btn-outline-secondary">
+                            Save as draft
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

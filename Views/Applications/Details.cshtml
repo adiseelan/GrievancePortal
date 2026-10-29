@@ -1,0 +1,162 @@
+@model ApplicationDetailsViewModel
+@{
+    ViewData["Title"] = "Application " + Model.Application.ApplicationNumber;
+    var a = Model.Application;
+
+    // Valid next statuses for staff, mirroring the server-side transition rules.
+    List<ApplicationStatus> nextStatuses = a.Status switch
+    {
+        ApplicationStatus.Submitted => new() { ApplicationStatus.UnderReview, ApplicationStatus.Approved, ApplicationStatus.Rejected },
+        ApplicationStatus.UnderReview => new() { ApplicationStatus.Approved, ApplicationStatus.Rejected },
+        _ => new()
+    };
+}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Application <span class="font-monospace">@a.ApplicationNumber</span></h1>
+        <div class="text-muted">@a.Scheme?.Name <span class="text-muted">&middot; @a.Scheme?.Department</span></div>
+    </div>
+    <partial name="_StatusBadge" model="@a.Status.ToString()" />
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-4">
+            <div class="card-header">Details</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Applicant</dt>
+                    <dd class="col-sm-8">@a.Applicant?.FullName <span class="text-muted small">(@a.Applicant?.Email)</span></dd>
+
+                    <dt class="col-sm-4 text-muted">Scheme</dt>
+                    <dd class="col-sm-8">@a.Scheme?.Name</dd>
+
+                    <dt class="col-sm-4 text-muted">Created</dt>
+                    <dd class="col-sm-8">@a.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</dd>
+
+                    <dt class="col-sm-4 text-muted">Submitted</dt>
+                    <dd class="col-sm-8">@(a.SubmittedAt?.ToLocalTime().ToString("dd MMM yyyy, HH:mm") ?? "Not submitted")</dd>
+
+                    <dt class="col-sm-4 text-muted">Supporting document</dt>
+                    <dd class="col-sm-8">
+                        @if (!string.IsNullOrEmpty(a.SupportingDocumentPath))
+                        {
+                            <a asp-action="Document" asp-route-id="@a.Id" target="_blank">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>@(a.SupportingDocumentOriginalName ?? "Download PDF")
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">None attached</span>
+                        }
+                    </dd>
+
+                    @if (!string.IsNullOrWhiteSpace(a.OfficerRemarks))
+                    {
+                        <dt class="col-sm-4 text-muted">Latest remark</dt>
+                        <dd class="col-sm-8">@a.OfficerRemarks</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        @* Applicant action: submit a draft *@
+        @if (!Model.IsStaffView && a.Status == ApplicationStatus.Draft)
+        {
+            <div class="card mb-4 border-primary-subtle">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <strong>This application is a draft.</strong>
+                        <div class="text-muted small">Submit it for review once your supporting document is attached.</div>
+                    </div>
+                    <form asp-action="Submit" asp-route-id="@a.Id" method="post">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i> Submit now</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @* Staff action: change status *@
+        @if (Model.IsStaffView)
+        {
+            <div class="card mb-4">
+                <div class="card-header">Officer action</div>
+                <div class="card-body">
+                    @if (nextStatuses.Count == 0)
+                    {
+                        <p class="text-muted mb-0">
+                            This application is <strong>@a.Status</strong> and has no further actions.
+                        </p>
+                    }
+                    else
+                    {
+                        <form asp-action="UpdateStatus" method="post">
+                            <input type="hidden" name="Id" value="@a.Id" />
+                            <div class="mb-3">
+                                <label class="form-label" for="NewStatus">New status</label>
+                                <select name="NewStatus" id="NewStatus" class="form-select">
+                                    @foreach (var st in nextStatuses)
+                                    {
+                                        <option value="@st">@st</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="Remarks">Remarks <span class="text-muted">(required when rejecting)</span></label>
+                                <textarea name="Remarks" id="Remarks" class="form-control" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update status</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-clock-history me-1"></i>Audit trail</div>
+            <div class="card-body">
+                @if (Model.Trail.Count == 0)
+                {
+                    <p class="text-muted mb-0">No activity recorded yet.</p>
+                }
+                else
+                {
+                    <ul class="timeline mb-0">
+                        @foreach (var log in Model.Trail)
+                        {
+                            <li>
+                                <div class="fw-semibold">@log.Action</div>
+                                @if (log.OldStatus is not null || log.NewStatus is not null)
+                                {
+                                    <div class="small">
+                                        @if (log.OldStatus is not null)
+                                        {
+                                            <span class="text-muted">@log.OldStatus</span> <i class="bi bi-arrow-right"></i>
+                                        }
+                                        <span>@log.NewStatus</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(log.Remarks))
+                                {
+                                    <div class="small fst-italic text-muted">&ldquo;@log.Remarks&rdquo;</div>
+                                }
+                                <div class="text-muted small mt-1">
+                                    @log.PerformedByName &middot; @log.Timestamp.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <a asp-action="@(Model.IsStaffView ? "Dashboard" : "Index")"
+           asp-controller="@(Model.IsStaffView ? "Officer" : "Applications")"
+           class="btn btn-outline-secondary w-100 mt-3">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+</div>

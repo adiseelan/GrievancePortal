@@ -1,0 +1,57 @@
+@model TrackGrievanceModel
+@{
+    ViewData["Title"] = "Track grievance";
+}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-3">Track a grievance</h1>
+        <p class="text-muted">Enter the ticket number you received when you filed your grievance.</p>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <form asp-action="Track" method="post" class="row g-2">
+                    <div class="col-sm-8">
+                        <input asp-for="TicketNumber" class="form-control" placeholder="e.g. GRV-20261021-ABC123" />
+                    </div>
+                    <div class="col-sm-4 d-grid">
+                        <button type="submit" class="btn btn-primary">Track</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @if (Model.Searched)
+        {
+            if (Model.Result is null)
+            {
+                <div class="alert alert-warning">
+                    No grievance was found for that ticket number. Please check and try again.
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h2 class="h5 mb-0 font-monospace">@Model.Result.TicketNumber</h2>
+                            <partial name="_StatusBadge" model="@Model.Result.Status.ToString()" />
+                        </div>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted">Subject</dt>
+                            <dd class="col-sm-8">@Model.Result.Subject</dd>
+                            <dt class="col-sm-4 text-muted">Raised on</dt>
+                            <dd class="col-sm-8">@Model.Result.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</dd>
+                            <dt class="col-sm-4 text-muted">Last updated</dt>
+                            <dd class="col-sm-8">@Model.Result.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy")</dd>
+                            @if (!string.IsNullOrWhiteSpace(Model.Result.Resolution))
+                            {
+                                <dt class="col-sm-4 text-muted">Resolution</dt>
+                                <dd class="col-sm-8" style="white-space: pre-line;">@Model.Result.Resolution</dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

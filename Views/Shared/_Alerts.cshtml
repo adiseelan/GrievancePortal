@@ -1,0 +1,20 @@
+@{
+    var map = new (string Key, string Css, string Icon)[]
+    {
+        ("Success", "alert-success", "bi-check-circle"),
+        ("Error",   "alert-danger",  "bi-exclamation-triangle"),
+        ("Warning", "alert-warning", "bi-exclamation-circle"),
+        ("Info",    "alert-info",    "bi-info-circle")
+    };
+}
+@foreach (var (key, css, icon) in map)
+{
+    if (TempData[key] is string message && !string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert @css alert-dismissible fade show d-flex align-items-start gap-2" role="alert">
+            <i class="bi @icon mt-1"></i>
+            <div class="flex-grow-1">@message</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+}

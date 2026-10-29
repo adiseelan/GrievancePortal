@@ -1,0 +1,112 @@
+:root {
+    --gov-navy: #0b3d66;
+    --gov-navy-dark: #082c4a;
+    --gov-teal: #0d9488;
+    --gov-accent: #f59e0b;
+    --gov-bg: #f5f7fa;
+}
+
+body {
+    background-color: var(--gov-bg);
+    color: #1f2937;
+}
+
+/* Navbar / footer */
+.gov-navbar {
+    background: linear-gradient(90deg, var(--gov-navy) 0%, var(--gov-navy-dark) 100%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .12);
+}
+.gov-navbar .navbar-brand {
+    font-weight: 600;
+    letter-spacing: .2px;
+}
+.gov-footer {
+    background: var(--gov-navy-dark);
+    color: #fff;
+}
+
+/* Thin accent strip under the navbar */
+header nav.gov-navbar {
+    border-bottom: 3px solid var(--gov-accent);
+}
+
+/* Cards */
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: .6rem;
+}
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #eef0f3;
+    font-weight: 600;
+}
+
+/* Hero */
+.gov-hero {
+    background: linear-gradient(120deg, var(--gov-navy) 0%, #11598f 100%);
+    color: #fff;
+    border-radius: .75rem;
+}
+
+/* Scheme tiles */
+.scheme-dept {
+    color: var(--gov-teal);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: .72rem;
+    letter-spacing: .5px;
+}
+
+/* Stat tiles */
+.stat-tile {
+    border-radius: .6rem;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+.stat-tile .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gov-navy);
+}
+.stat-tile .stat-label {
+    color: #6b7280;
+    font-size: .85rem;
+}
+
+/* Timeline (audit trail) */
+.timeline {
+    list-style: none;
+    padding-left: 1rem;
+    border-left: 2px solid #e5e7eb;
+    margin-left: .25rem;
+}
+.timeline > li {
+    position: relative;
+    padding: 0 0 1rem 1.25rem;
+}
+.timeline > li::before {
+    content: "";
+    position: absolute;
+    left: -0.55rem;
+    top: .25rem;
+    width: .7rem;
+    height: .7rem;
+    border-radius: 50%;
+    background: var(--gov-teal);
+    border: 2px solid #fff;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--gov-navy);
+    --bs-btn-border-color: var(--gov-navy);
+    --bs-btn-hover-bg: var(--gov-navy-dark);
+    --bs-btn-hover-border-color: var(--gov-navy-dark);
+    --bs-btn-active-bg: var(--gov-navy-dark);
+}
+
+.required-star::after {
+    content: " *";
+    color: #dc2626;
+}
+
+footer a { color: #cbd5e1; }

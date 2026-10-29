@@ -1,0 +1,117 @@
+@{
+    ViewData["Title"] = "Officer desk";
+    var apps = ViewBag.PendingApplications as List<SchemeApplication> ?? new();
+    var grievances = ViewBag.OpenGrievances as List<Grievance> ?? new();
+}
+<h1 class="h3 mb-3">Officer desk</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-tile p-3 text-center">
+            <div class="stat-value">@apps.Count</div>
+            <div class="stat-label">Applications pending</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-tile p-3 text-center">
+            <div class="stat-value">@grievances.Count</div>
+            <div class="stat-label">Grievances open</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-tile p-3 text-center">
+            <div class="stat-value">@ViewBag.ApprovedCount</div>
+            <div class="stat-label">Approved to date</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-tile p-3 text-center">
+            <div class="stat-value">@ViewBag.ResolvedCount</div>
+            <div class="stat-label">Grievances resolved</div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-folder2-open me-1"></i>Applications awaiting action</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Application no.</th>
+                    <th>Scheme</th>
+                    <th>Applicant</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th class="text-end">Review</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (apps.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-3">Nothing pending. All caught up.</td></tr>
+                }
+                else
+                {
+                    @foreach (var a in apps)
+                    {
+                        <tr>
+                            <td class="font-monospace small">@a.ApplicationNumber</td>
+                            <td>@a.Scheme?.Name</td>
+                            <td>@a.Applicant?.FullName</td>
+                            <td><partial name="_StatusBadge" model="@a.Status.ToString()" /></td>
+                            <td class="small text-muted">@(a.SubmittedAt?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="text-end">
+                                <a asp-controller="Applications" asp-action="Details" asp-route-id="@a.Id"
+                                   class="btn btn-sm btn-primary">Review</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-chat-left-dots me-1"></i>Grievances to act on</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Ticket no.</th>
+                    <th>Subject</th>
+                    <th>Applicant</th>
+                    <th>Status</th>
+                    <th>Assigned</th>
+                    <th class="text-end">Open</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (grievances.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-3">No open grievances.</td></tr>
+                }
+                else
+                {
+                    @foreach (var g in grievances)
+                    {
+                        <tr>
+                            <td class="font-monospace small">@g.TicketNumber</td>
+                            <td>@g.Subject</td>
+                            <td>@g.Applicant?.FullName</td>
+                            <td><partial name="_StatusBadge" model="@g.Status.ToString()" /></td>
+                            <td class="small text-muted">@(g.AssignedOfficer?.FullName ?? "—")</td>
+                            <td class="text-end">
+                                <a asp-controller="Grievances" asp-action="Details" asp-route-id="@g.Id"
+                                   class="btn btn-sm btn-primary">Open</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

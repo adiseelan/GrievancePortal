@@ -1,0 +1,47 @@
+@model List<SchemeApplication>
+@{
+    ViewData["Title"] = "My applications";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">My applications</h1>
+    <a asp-controller="Schemes" asp-action="Index" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Apply to a scheme</a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-light border">
+        You haven't applied to any scheme yet. <a asp-controller="Schemes" asp-action="Index">Browse schemes</a> to get started.
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Application no.</th>
+                        <th>Scheme</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td class="font-monospace small">@a.ApplicationNumber</td>
+                            <td>@a.Scheme?.Name</td>
+                            <td><partial name="_StatusBadge" model="@a.Status.ToString()" /></td>
+                            <td class="small text-muted">@(a.SubmittedAt?.ToLocalTime().ToString("dd MMM yyyy") ?? "—")</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Open</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

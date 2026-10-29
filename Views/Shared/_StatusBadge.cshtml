@@ -1,0 +1,19 @@
+@model string
+@{
+    var css = Model switch
+    {
+        "Draft" => "text-bg-secondary",
+        "Submitted" => "text-bg-primary",
+        "UnderReview" => "text-bg-info",
+        "Approved" => "text-bg-success",
+        "Rejected" => "text-bg-danger",
+        "Open" => "text-bg-primary",
+        "Assigned" => "text-bg-info",
+        "InProgress" => "text-bg-warning",
+        "Resolved" => "text-bg-success",
+        "Closed" => "text-bg-secondary",
+        _ => "text-bg-light"
+    };
+    var label = System.Text.RegularExpressions.Regex.Replace(Model ?? "", "([a-z])([A-Z])", "$1 $2");
+}
+<span class="badge @css">@label</span>

@@ -1,0 +1,25 @@
+@model SchemeFormModel
+<div class="mb-3">
+    <label asp-for="Name" class="form-label required-star"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Department" class="form-label required-star"></label>
+    <input asp-for="Department" class="form-control" />
+    <span asp-validation-for="Department" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Description" class="form-label required-star"></label>
+    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+    <span asp-validation-for="Description" class="text-danger small"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Eligibility" class="form-label required-star"></label>
+    <textarea asp-for="Eligibility" class="form-control" rows="3"></textarea>
+    <span asp-validation-for="Eligibility" class="text-danger small"></span>
+</div>
+<div class="form-check mb-3">
+    <input asp-for="IsActive" class="form-check-input" />
+    <label asp-for="IsActive" class="form-check-label"></label>
+</div>
